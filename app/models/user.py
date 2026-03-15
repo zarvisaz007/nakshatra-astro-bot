@@ -1,0 +1,23 @@
+from datetime import date, datetime, time
+
+from sqlalchemy import BigInteger, Date, DateTime, Float, String, Time, func
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.database import Base
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True, index=True)
+    birth_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    birth_time: Mapped[time | None] = mapped_column(Time, nullable=True)
+    birth_lat: Mapped[float | None] = mapped_column(Float, nullable=True)
+    birth_lon: Mapped[float | None] = mapped_column(Float, nullable=True)
+    city_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    @property
+    def is_onboarded(self) -> bool:
+        return self.birth_date is not None and self.birth_lat is not None

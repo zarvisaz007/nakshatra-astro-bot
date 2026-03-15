@@ -5,18 +5,19 @@
 **Goal:** Functional bot with core features, deployed and usable.
 
 **Features:**
-- [ ] Project bootstrap (repo, docs, structure)
-- [ ] `app/config.py` — pydantic-settings config
-- [ ] `app/models/user.py` — SQLAlchemy User model
-- [ ] `app/services/astrology.py` — kerykeion natal chart + sun sign
-- [ ] `app/services/horoscope.py` — Claude API reading generation
-- [ ] `app/services/cache.py` — Redis read/write with TTL
-- [ ] `app/handlers/start.py` — onboarding FSM (collect birth data)
-- [ ] `app/handlers/horoscope.py` — `/horoscope` command
-- [ ] `app/handlers/chart.py` — `/chart` command
-- [ ] `app/handlers/sign.py` — `/sign` command
-- [ ] `app/bot.py` — entry point, dispatcher wiring
-- [ ] `requirements.txt` + `.env.example`
+- [x] Project bootstrap (repo, docs, structure)
+- [x] `app/config.py` — pydantic-settings config
+- [x] `app/models/user.py` — SQLAlchemy User model
+- [x] `app/services/user.py` — get_or_create, update_birth_data
+- [x] `app/services/astrology.py` — kerykeion natal chart + sun sign
+- [x] `app/services/horoscope.py` — Claude API reading generation
+- [x] `app/services/cache.py` — Redis read/write with TTL
+- [x] `app/handlers/start.py` — onboarding FSM (collect birth data)
+- [x] `app/handlers/horoscope.py` — `/horoscope` command
+- [x] `app/handlers/chart.py` — `/chart` command
+- [x] `app/handlers/sign.py` — `/sign` command
+- [x] `app/bot.py` — entry point, dispatcher wiring
+- [x] `requirements.txt` + `.env.example`
 - [ ] Deploy to Railway
 
 **Success criteria:** 10 test users onboarded, horoscopes generating correctly.
