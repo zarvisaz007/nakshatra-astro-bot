@@ -66,6 +66,10 @@ T = {
         "career_wait": "💼 Analyzing your career chart...",
         "marriage_wait": "💑 Analyzing your marriage chart...",
         "wealth_wait": "💰 Analyzing your wealth chart...",
+        # Phase 4
+        "puja_wait": "🕉️ Finding your puja recommendations...",
+        "mantra_wait": "🕉️ Preparing your personal mantra sadhana...",
+        "gems_wait": "💎 Calculating your gemstone chart...",
         # Skip button
         "skip": "Skip",
         "male": "Male ♂", "female": "Female ♀", "skip_gender": "Prefer not to say",
@@ -136,6 +140,10 @@ T = {
         "career_wait": "💼 करियर कुंडली का विश्लेषण हो रहा है...",
         "marriage_wait": "💑 विवाह कुंडली का विश्लेषण हो रहा है...",
         "wealth_wait": "💰 धन कुंडली का विश्लेषण हो रहा है...",
+        # Phase 4
+        "puja_wait": "🕉️ आपकी पूजा अनुशंसा खोजी जा रही है...",
+        "mantra_wait": "🕉️ आपकी व्यक्तिगत मंत्र साधना तैयार हो रही है...",
+        "gems_wait": "💎 आपकी रत्न कुंडली की गणना हो रही है...",
         # Buttons
         "skip": "छोड़ें",
         "male": "पुरुष ♂", "female": "महिला ♀", "skip_gender": "बताना नहीं",
