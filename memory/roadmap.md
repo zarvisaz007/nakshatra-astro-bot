@@ -1,64 +1,127 @@
-# Roadmap
+# Roadmap — Nakshatra Astro Bot
 
-## Phase 1 — MVP
+## Phase 1 — Foundation MVP ✅ (partially done)
 
-**Goal:** Functional bot with core features, deployed and usable.
+**Goal:** Working bot with Vedic astrology core, daily engagement, AI consultation.
 
-**Features:**
-- [x] Project bootstrap (repo, docs, structure)
-- [x] `app/config.py` — pydantic-settings config
-- [x] `app/models/user.py` — SQLAlchemy User model
-- [x] `app/services/user.py` — get_or_create, update_birth_data
-- [x] `app/services/astrology.py` — kerykeion natal chart + sun sign
-- [x] `app/services/horoscope.py` — Claude API reading generation
-- [x] `app/services/cache.py` — Redis read/write with TTL
-- [x] `app/handlers/start.py` — onboarding FSM (collect birth data)
-- [x] `app/handlers/horoscope.py` — `/horoscope` command
-- [x] `app/handlers/chart.py` — `/chart` command
-- [x] `app/handlers/sign.py` — `/sign` command
-- [x] `app/bot.py` — entry point, dispatcher wiring
-- [x] `requirements.txt` + `.env.example`
-- [ ] Deploy to Railway
+### Infrastructure ✅
+- [x] Project bootstrap, docs, architecture
+- [x] aiogram 3.x bot, Redis FSM, SQLite DB
+- [x] Language selector (Hindi / English)
+- [x] Flexible onboarding (date/time/location)
+- [x] Western horoscope via kerykeion
+- [x] OpenRouter AI (GLM 4.5 Air free)
 
-**Success criteria:** 10 test users onboarded, horoscopes generating correctly.
-
----
-
-## Phase 2 — Growth Features
-
-**Goal:** Add engagement features that drive return visits.
-
-**Features:**
-- [ ] `/match [sign]` — compatibility reading between two signs (Claude-generated)
-- [ ] Daily horoscope push notifications (opt-in, scheduled via APScheduler)
-- [ ] Transit alerts — notify user when major planet transits their natal placements
-- [ ] Inline mode — `@botname aries` returns sign info in any chat
-- [ ] `/delete_account` — GDPR compliance, wipe user data
-
-**Dependencies:** Phase 1 complete + stable user base.
+### Phase 1 — Remaining (in progress)
+- [ ] Add name + gender to user profile
+- [ ] Switch to Vedic (sidereal/Lahiri) calculations
+- [ ] Kundli summary: Lagna, Rashi, Nakshatra, planet placements
+- [ ] AI-generated personalized introduction on onboarding
+- [ ] Enhanced daily horoscope: lucky number, color, time, advice
+- [ ] Daily Panchang: Tithi, Nakshatra, Rahu Kaal, Abhijit Muhurat
+- [ ] Daily Spiritual Guidance: planet influence + mantra
+- [ ] Ask AI (/ask command): 3 free questions, then paywall
+- [ ] Question counter in DB
 
 ---
 
-## Phase 3 — Premium Tier
+## Phase 2 — Monetization Features
 
-**Goal:** Monetization to cover infrastructure costs.
+**Goal:** Paid services replicating what people pay Pandits for.
 
-**Features:**
-- [ ] Stripe payment integration (Telegram Stars or card)
-- [ ] Premium: detailed natal chart PDF export (reportlab or weasyprint)
-- [ ] Premium: year-ahead forecast (Claude, monthly breakdown)
-- [ ] Premium: personalized daily reading (per-user, not per-sign cache)
-- [ ] Multi-language support (i18n via fluent or gettext)
-- [ ] Admin dashboard (simple web UI, FastAPI + htmx)
+**Price range:** ₹49–₹299
 
-**Dependencies:** Phase 2 complete, >500 active users.
+- [ ] Payment integration (Razorpay or Telegram Stars)
+- [ ] Detailed Horoscope Report (personality, strengths, challenges)
+- [ ] Kundli Matching (Guna Milan, Manglik, compatibility score)
+- [ ] Dosha Detection (Manglik, Kaal Sarp, Shani, Rahu-Ketu, Pitru)
+- [ ] Lucky Name & Number (baby names, business name, vehicle, mobile)
+- [ ] Personal Remedies (mantra, donation, fasting, temple)
 
 ---
 
-## Backlog / Ideas
+## Phase 3 — Advanced Astrology Services
 
-- Synastry charts (two people's charts overlaid)
-- Moon phase tracker
-- Retrograde notifications
-- Astrocartography (location-based destiny map)
-- Integration with Google Calendar for auspicious dates
+**Goal:** Deep insights matching professional astrologers.
+
+**Price range:** ₹499–₹1999
+
+- [ ] Full Kundli Analysis (career, finance, marriage, health, travel)
+- [ ] Planetary Dasha Prediction (Mahadasha, 10-year timeline)
+- [ ] Career Astrology (best fields, promotion timing, job change)
+- [ ] Marriage Prediction (timing, love vs arranged, spouse personality)
+- [ ] Wealth Astrology (wealth cycles, investment timing, risks)
+
+---
+
+## Phase 4 — Spiritual Remedies & Puja Services
+
+**Goal:** Monetize like traditional Pandits.
+
+**Price range:** ₹2000–₹10,000+
+
+- [ ] Personalized Puja Recommendations (Shani, Navagraha, Rahu-Ketu, etc.)
+- [ ] Personalized Mantra Sadhana (exact mantra, count, timing, duration)
+- [ ] Gemstone Recommendation (with upsell to purchase)
+- [ ] Temple Puja Service (partner temples, photos/videos delivery)
+
+---
+
+## Phase 5 — AI Enhanced Features
+
+**Goal:** Differentiate from normal astrology bots.
+
+- [ ] AI Astrology Chat (birth chart + transit aware)
+- [ ] Palm Reading (image upload → AI prediction)
+- [ ] Dream Interpretation (write dream → spiritual meaning)
+- [ ] Numerology AI (name + DOB → life path, destiny)
+
+---
+
+## Phase 6 — Subscription Model
+
+**Goal:** Recurring revenue.
+
+| Plan | Price | Includes |
+|---|---|---|
+| Basic | ₹199/month | Unlimited horoscope, AI questions, Panchang, Remedies |
+| Premium | ₹499/month | + Detailed predictions, marriage, career, numerology |
+| Elite | ₹999/month | + Unlimited AI, full Kundli, puja, priority support |
+
+- [ ] Subscription tier tracking in DB
+- [ ] Feature gates by tier
+- [ ] Payment + renewal flow
+
+---
+
+## Phase 7 — Retention Features
+
+**Goal:** Daily habit formation.
+
+- [ ] Scheduled daily horoscope push (opt-in)
+- [ ] Daily mantra push
+- [ ] Planet transit alerts
+- [ ] Festival / Ekadashi / Purnima reminders
+- [ ] Weekly prediction digest
+
+---
+
+## Phase 8 — Viral Growth Features
+
+**Goal:** Organic sharing.
+
+- [ ] Shareable Destiny Report (image card)
+- [ ] Compatibility Test (share with partner)
+- [ ] Age Prediction ("what happens at age 30?")
+- [ ] Friend Comparison
+
+---
+
+## Success Metrics
+
+- Daily active users
+- Questions asked per user
+- Paid conversion rate
+- Subscription rate
+- Day-7 retention
+- Day-30 retention

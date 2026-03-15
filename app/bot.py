@@ -8,7 +8,7 @@ from aiogram.fsm.storage.redis import RedisStorage
 
 from app.config import settings
 from app.database import create_tables
-from app.handlers import start, horoscope, chart, sign
+from app.handlers import start, horoscope, chart, sign, panchang, ask, spiritual
 
 logging.basicConfig(
     level=logging.INFO,
@@ -32,8 +32,23 @@ async def main() -> None:
     dp.include_router(horoscope.router)
     dp.include_router(chart.router)
     dp.include_router(sign.router)
+    dp.include_router(panchang.router)
+    dp.include_router(ask.router)
+    dp.include_router(spiritual.router)
 
-    logger.info("Starting bot...")
+    # Set bot commands menu
+    from aiogram.types import BotCommand
+    await bot.set_my_commands([
+        BotCommand(command="start",     description="🔄 Setup / Change language"),
+        BotCommand(command="horoscope", description="🔮 Today's Vedic horoscope"),
+        BotCommand(command="kundli",    description="🔯 Your birth chart"),
+        BotCommand(command="panchang",  description="📅 Today's Panchang"),
+        BotCommand(command="ask",       description="🙏 Ask astrology AI (3 free)"),
+        BotCommand(command="spiritual", description="🕉️ Daily spiritual guidance"),
+        BotCommand(command="sign",      description="♈ Zodiac sign info"),
+    ])
+
+    logger.info("Starting bot @Nakshatra_Astrobot...")
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
 
 
