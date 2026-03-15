@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+{% block content %}
+<h1>Users</h1>
+
+<form method="GET" action="/users" class="search-bar">
+  <input type="text" name="search" value="{{ search }}" placeholder="Search by name or Telegram ID...">
+  <button type="submit" class="btn">Search</button>
+  {% if search %}<a href="/users" class="btn" style="background:#374151">Clear</a>{% endif %}
+</form>
+
+<div class="card">
+  <table>
+    <tr>
+      <th>Name</th><th>Telegram ID</th><th>Lang</th><th>City</th>
+      <th>Nakshatra</th><th>Questions</th><th>Tier</th><th>Joined</th>
+    </tr>
+    {% for u in users %}
+    <tr>
+      <td>{{ u.name or "—" }}</td>
+      <td><code>{{ u.telegram_id }}</code></td>
+      <td>{{ u.language or "en" }}</td>
+      <td>{{ u.city_name or "—" }}</td>
+      <td>{{ "—" if not u.birth_date else "✓" }}</td>
+      <td>{{ u.free_questions_used or 0 }}</td>
+      <td>
+        <span class="badge {% if u.subscription_tier == 'free' %}badge-free{% else %}badge-paid{% endif %}">
+          {{ u.subscription_tier or "free" }}
+        </span>
+      </td>
+      <td style="color:#6b7280;font-size:12px">
+        {{ u.created_at.strftime('%d %b %Y') if u.created_at else "—" }}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8" style="color:#9ca3af;padding:20px">No users found</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nakshatra Admin — {% block title %}{% endblock %}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:#0f0f1a;color:#e0d9f7;min-height:100vh}
+  a{color:#a78bfa;text-decoration:none}
+  a:hover{text-decoration:underline}
+  nav{background:#1a1a2e;border-bottom:1px solid #2d2d4e;padding:12px 24px;display:flex;align-items:center;gap:24px}
+  nav .logo{font-size:18px;font-weight:700;color:#c4b5fd}
+  nav a{color:#9ca3af;font-size:14px}
+  nav a:hover,nav a.active{color:#e0d9f7}
+  .container{max-width:1100px;margin:0 auto;padding:32px 24px}
+  h1{font-size:24px;font-weight:700;margin-bottom:24px;color:#f0ebff}
+  h2{font-size:18px;font-weight:600;margin-bottom:16px;color:#c4b5fd}
+  .card{background:#1a1a2e;border:1px solid #2d2d4e;border-radius:12px;padding:24px;margin-bottom:20px}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px}
+  .stat{background:#1a1a2e;border:1px solid #2d2d4e;border-radius:10px;padding:20px;text-align:center}
+  .stat .num{font-size:32px;font-weight:700;color:#a78bfa}
+  .stat .label{font-size:12px;color:#9ca3af;margin-top:4px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th{text-align:left;padding:10px 12px;color:#9ca3af;border-bottom:1px solid #2d2d4e;font-weight:500}
+  td{padding:10px 12px;border-bottom:1px solid #1e1e30}
+  tr:hover td{background:#1e1e30}
+  .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+  .badge-free{background:#1e293b;color:#64748b}
+  .badge-paid{background:#1e1a2e;color:#a78bfa}
+  form label{display:block;font-size:13px;color:#9ca3af;margin-bottom:6px}
+  form input,form select{width:100%;background:#0f0f1a;border:1px solid #2d2d4e;border-radius:8px;
+    padding:10px 12px;color:#e0d9f7;font-size:14px;margin-bottom:16px}
+  form input:focus,form select:focus{outline:none;border-color:#7c3aed}
+  .btn{background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:10px 20px;
+    font-size:14px;font-weight:600;cursor:pointer}
+  .btn:hover{background:#6d28d9}
+  .btn-sm{padding:6px 12px;font-size:12px}
+  .alert{padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:14px}
+  .alert-success{background:#14532d30;border:1px solid #22c55e40;color:#86efac}
+  .search-bar{display:flex;gap:8px;margin-bottom:20px}
+  .search-bar input{flex:1;margin-bottom:0}
+</style>
+</head>
+<body>
+<nav>
+  <span class="logo">🔯 Nakshatra Admin</span>
+  <a href="/" {% if request.url.path == "/" %}class="active"{% endif %}>Dashboard</a>
+  <a href="/settings" {% if request.url.path == "/settings" %}class="active"{% endif %}>Settings</a>
+  <a href="/users" {% if request.url.path == "/users" %}class="active"{% endif %}>Users</a>
+</nav>
+<div class="container">
+{% block content %}{% endblock %}
+</div>
+</body>
+</html>

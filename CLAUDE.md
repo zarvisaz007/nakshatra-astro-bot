@@ -1,89 +1,129 @@
 # CLAUDE.md — Agent Onboarding Guide
 
-> Read this first. It tells you what this project is, what's been done, what to do next, and how to work here.
+> Read this first. Current state, what's done, what's next, rules.
 
 ## What This Is
 
-An astrology Telegram bot. Users send their birth data, get AI-generated daily horoscopes (Claude-powered, Redis-cached) and natal chart summaries (kerykeion).
+**Nakshatra Astro** — AI Vedic astrology Telegram bot (`@Nakshatra_Astrobot`).
+Hindi + English. Vedic/sidereal calculations. Claude/OpenRouter AI readings.
+Target: Indian astrology audience. Monetize via reports, remedies, puja bookings, subscriptions.
 
-## Project Memory
-
-All deep context lives in `memory/`. Read these before making decisions:
+## Memory Index
 
 | File | Read when... |
 |---|---|
-| [memory/project_summary.md](memory/project_summary.md) | You need to understand goals, scope, target users |
-| [memory/architecture.md](memory/architecture.md) | You're touching any service, DB, or cache layer |
-| [memory/decisions.md](memory/decisions.md) | You're considering changing a library or pattern |
-| [memory/requirements.md](memory/requirements.md) | You're implementing a feature or fixing a bug |
-| [memory/roadmap.md](memory/roadmap.md) | You need to know what's done and what's next |
+| [memory/project_summary.md](memory/project_summary.md) | Need goals, vision, target users |
+| [memory/architecture.md](memory/architecture.md) | Touching any service, DB, or cache layer |
+| [memory/decisions.md](memory/decisions.md) | Considering changing a library or pattern |
+| [memory/requirements.md](memory/requirements.md) | Implementing a feature or fixing a bug |
+| [memory/roadmap.md](memory/roadmap.md) | What's done and what's next |
 
-## Current State
+## Current State (as of Phase 1 complete)
 
-**Phase 1 bootstrap is complete.** The repo has docs/architecture only — no application code yet.
-
-What exists:
-- `README.md`, `.gitignore`, `MEMORY.md`, `CLAUDE.md`
-- `memory/` — full architecture, decisions, requirements, roadmap
-
-What does NOT exist yet (needs to be built):
-- `app/` — all application code
-- `requirements.txt`
-- `.env.example`
-
-## What To Build Next
-
-Work through **Phase 1** in `memory/roadmap.md` in this order:
-
-1. `requirements.txt` + `.env.example`
-2. `app/config.py` — pydantic-settings
-3. `app/models/user.py` — SQLAlchemy User model
-4. `app/services/astrology.py` — kerykeion natal chart
-5. `app/services/horoscope.py` — Claude API reading
-6. `app/services/cache.py` — Redis TTL cache
-7. `app/handlers/start.py` — onboarding FSM
-8. `app/handlers/horoscope.py`
-9. `app/handlers/chart.py`
-10. `app/handlers/sign.py`
-11. `app/bot.py` — entry point
-
-## Stack (Quick Reference)
-
+### What exists and works:
 ```
-Bot:        aiogram 3.x (async, FSM built-in)
-Astrology:  kerykeion (pure Python, natal + transits)
-AI:         Claude API — claude-haiku-4-5 (cheap, fast)
-Cache:      Redis — key: horoscope:{sign}:{YYYY-MM-DD}, TTL = seconds to midnight UTC
-DB:         SQLite (dev) / PostgreSQL (prod) via SQLAlchemy async
-Deploy:     Railway (git-push, Postgres + Redis plugins)
+app/
+├── bot.py                  — entry point, all routers wired, bot menu set
+├── config.py               — pydantic-settings (.env)
+├── database.py             — async SQLAlchemy, SQLite dev
+├── i18n.py                 — all UI strings in en/hi
+├── models/user.py          — User: name, gender, birth data, language,
+│                             free_questions_used, subscription_tier
+├── services/
+│   ├── user.py             — get_or_create, update_birth_data, increment_questions
+│   ├── astrology.py        — Vedic sidereal (Lahiri): Kundli, Nakshatra, Dasha, Panchang
+│   ├── horoscope.py        — OpenRouter AI: horoscope, intro, ask_ai, spiritual_guidance
+│   └── cache.py            — Redis cache, midnight UTC TTL
+└── handlers/
+    ├── start.py            — FSM: lang → name → gender → DOB → time → city → AI intro
+    ├── horoscope.py        — /horoscope (Vedic, lucky num+color)
+    ├── chart.py            — /kundli + /chart alias
+    ├── panchang.py         — /panchang (Tithi, Nakshatra, Rahu Kaal, Abhijit)
+    ├── ask.py              — /ask (3 free questions, paywall prompt after)
+    ├── spiritual.py        — /spiritual (mantra + planet influence)
+    └── sign.py             — /sign [zodiac]
 ```
 
-## Coding Conventions
+### Bot commands registered:
+`/start` `/horoscope` `/kundli` `/panchang` `/ask` `/spiritual` `/sign`
 
-- All async — no blocking calls anywhere in the bot process
-- Config via environment variables only (pydantic-settings), never hardcode
-- SQLAlchemy async sessions — always use `async with session` context manager
-- Redis keys follow the convention in `memory/architecture.md`
-- Structured logging (standard `logging` module, JSON formatter for prod)
-- Keep handlers thin — business logic lives in `app/services/`
+### Infrastructure:
+- Python 3.13, aiogram 3.x, kerykeion (Vedic), OpenRouter GLM 4.5 Air (free)
+- SQLite (dev), Redis FSM + cache
+- GitHub: `zarvisaz007/nakshatra-astro-bot`
+- Running locally on Mac via `venv/bin/python -m app.bot`
 
-## Environment Variables (required)
+## What To Build Next — Phase 2
+
+**No payment module** (skip entirely for now).
+
+Build in this order:
+
+1. **Admin UI** (`app/admin/`) — FastAPI web panel (localhost:8080)
+   - Change API keys, model, view user stats, manage settings
+   - Simple HTML + password-protected
+   - Run alongside bot as separate process
+
+2. **Kundli Matching** (`/match`) — Guna Milan, compatibility score, Manglik check
+
+3. **Dosha Detection** (`/dosha`) — Manglik, Kaal Sarp, Shani, Rahu-Ketu, Pitru
+
+4. **Lucky Name & Number** (`/lucky`) — baby names, business name, lucky numbers
+
+5. **Personal Remedies** (`/remedy`) — mantra, donation, fasting, temple recommendation
+
+See `memory/roadmap.md` for full checklist.
+
+## Stack Quick Reference
+
+```
+Bot:        aiogram 3.x (async, FSM)
+Astrology:  kerykeion — zodiac_type="Sidereal", sidereal_mode="LAHIRI"
+AI:         OpenRouter via openai SDK — base_url="https://openrouter.ai/api/v1"
+Model:      z-ai/glm-4.5-air:free (max_tokens=800, thinking model needs headroom)
+Cache:      Redis — key: horoscope:{sign}:{lang}:{YYYY-MM-DD}, TTL=midnight UTC
+DB:         SQLAlchemy async, SQLite dev / Postgres prod
+Config:     pydantic-settings → .env
+Admin:      FastAPI + Jinja2, localhost:8080, basic auth
+```
+
+## Critical Rules
+
+- **Async everywhere** — no blocking calls in handlers
+- **Cache before AI** — always check Redis before calling OpenRouter
+- **Thin handlers** — logic in services/, handlers just orchestrate
+- **No payment module** — skip Razorpay/Stripe until explicitly asked
+- **GLM needs 800 max_tokens** — it's a thinking model; 300 leaves nothing for output
+- **Vedic only** — zodiac_type="Sidereal", sidereal_mode="LAHIRI" always
+- **Delete astro.db when adding new columns** — no migration tooling yet
+
+## Environment Variables
 
 ```
 TELEGRAM_BOT_TOKEN=
-ANTHROPIC_API_KEY=
+OPENROUTER_API_KEY=
+OPENROUTER_MODEL=z-ai/glm-4.5-air:free
 REDIS_URL=redis://localhost:6379
 DATABASE_URL=sqlite+aiosqlite:///./astro.db
+ADMIN_PASSWORD=changeme
+ADMIN_PORT=8080
 ```
 
-## Do Not
+## Running Locally
 
-- Do not change the framework choices without reading `memory/decisions.md` first
-- Do not call Claude API per-user for horoscopes — always go through the Redis cache
-- Do not use sync SQLAlchemy — async only
-- Do not store secrets in code — `.env` only
-- Do not add features beyond the current phase without updating `memory/roadmap.md`
+```bash
+# Terminal 1 — bot
+cd ~/Desktop/claude-terminal
+brew services start redis
+venv/bin/python -m app.bot
 
-## When You Finish Work
+# Terminal 2 — admin UI (Phase 2)
+venv/bin/python -m app.admin
+```
 
-Update `memory/roadmap.md` — check off completed items and note any new decisions made. If you made a significant architectural choice, add an ADR to `memory/decisions.md`.
+## After Completing Work
+
+1. Check off items in `memory/roadmap.md`
+2. Add ADRs to `memory/decisions.md` for significant choices
+3. Commit with `feat:` / `fix:` / `chore:` prefix
+4. Push to `zarvisaz007/nakshatra-astro-bot`

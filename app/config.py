@@ -6,9 +6,11 @@ class Settings(BaseSettings):
 
     telegram_bot_token: str
     openrouter_api_key: str
-    openrouter_model: str = "thudm/glm-4.5-air:free"
+    openrouter_model: str = "z-ai/glm-4.5-air:free"
     redis_url: str = "redis://localhost:6379"
     database_url: str = "sqlite+aiosqlite:///./astro.db"
+    admin_password: str = "nakshatra_admin"
+    admin_port: int = 8080
 
 
 settings = Settings()

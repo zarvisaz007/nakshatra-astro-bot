@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<h1>Settings</h1>
+
+{% if saved %}
+<div class="alert alert-success">✅ Settings saved. Restart the bot for changes to take effect.</div>
+{% endif %}
+
+<div class="card">
+  <h2>AI Configuration</h2>
+  <form method="POST" action="/settings">
+    <label>OpenRouter API Key <small style="color:#6b7280">(leave blank to keep current)</small></label>
+    <input type="password" name="openrouter_api_key" placeholder="sk-or-v1-...">
+
+    <label>AI Model</label>
+    <select name="openrouter_model">
+      {% for m in free_models %}
+      <option value="{{ m }}" {% if m == env.get('OPENROUTER_MODEL') %}selected{% endif %}>{{ m }}</option>
+      {% endfor %}
+      <option value="{{ env.get('OPENROUTER_MODEL','') }}"
+        {% if env.get('OPENROUTER_MODEL','') not in free_models %}selected{% endif %}>
+        {{ env.get('OPENROUTER_MODEL','') }} (current)
+      </option>
+    </select>
+
+    <h2 style="margin-top:8px">Telegram</h2>
+    <label>Bot Token <small style="color:#6b7280">(leave blank to keep current)</small></label>
+    <input type="password" name="telegram_bot_token" placeholder="123456:ABC...">
+
+    <h2 style="margin-top:8px">Admin</h2>
+    <label>New Admin Password <small style="color:#6b7280">(leave blank to keep current)</small></label>
+    <input type="password" name="admin_password" placeholder="new password">
+
+    <button type="submit" class="btn">💾 Save Settings</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Current .env Values</h2>
+  <table>
+    <tr><th>Key</th><th>Value</th></tr>
+    {% for k, v in env.items() %}
+    <tr>
+      <td><code>{{ k }}</code></td>
+      <td>
+        {% if 'KEY' in k or 'TOKEN' in k or 'PASSWORD' in k %}
+          <code>{{ v[:8] }}...{{ v[-4:] }}</code>
+        {% else %}
+          <code>{{ v }}</code>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+
+<div class="stat-grid">
+  <div class="stat"><div class="num">{{ stats.total_users }}</div><div class="label">Total Users</div></div>
+  <div class="stat"><div class="num">{{ stats.onboarded }}</div><div class="label">Onboarded</div></div>
+  <div class="stat"><div class="num">{{ stats.hindi_users }}</div><div class="label">Hindi Users</div></div>
+  <div class="stat"><div class="num">{{ stats.english_users }}</div><div class="label">English Users</div></div>
+  <div class="stat"><div class="num">{{ stats.paid_users }}</div><div class="label">Paid Users</div></div>
+</div>
+
+<div class="card">
+  <h2>Current Config</h2>
+  <table>
+    <tr><th>Setting</th><th>Value</th></tr>
+    <tr><td>AI Model</td><td><code>{{ stats.current_model }}</code></td></tr>
+    <tr><td>OpenRouter Key</td><td><code>{{ stats.api_key_preview }}</code></td></tr>
+  </table>
+  <br><a href="/settings" class="btn btn-sm">⚙️ Change Settings</a>
+</div>
+
+<div class="card">
+  <h2>Top Askers (free questions used)</h2>
+  <table>
+    <tr><th>Name</th><th>Telegram ID</th><th>Questions Used</th></tr>
+    {% for row in stats.top_askers %}
+    <tr>
+      <td>{{ row.name or "—" }}</td>
+      <td><code>{{ row.telegram_id }}</code></td>
+      <td>{{ row.free_questions_used }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="3" style="color:#9ca3af">No data yet</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

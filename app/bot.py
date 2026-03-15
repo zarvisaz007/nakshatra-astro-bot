@@ -5,10 +5,12 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.redis import RedisStorage
+from aiogram.types import BotCommand
 
 from app.config import settings
 from app.database import create_tables
 from app.handlers import start, horoscope, chart, sign, panchang, ask, spiritual
+from app.handlers import match, dosha, remedy, lucky
 
 logging.basicConfig(
     level=logging.INFO,
@@ -35,16 +37,22 @@ async def main() -> None:
     dp.include_router(panchang.router)
     dp.include_router(ask.router)
     dp.include_router(spiritual.router)
+    dp.include_router(match.router)
+    dp.include_router(dosha.router)
+    dp.include_router(remedy.router)
+    dp.include_router(lucky.router)
 
-    # Set bot commands menu
-    from aiogram.types import BotCommand
     await bot.set_my_commands([
         BotCommand(command="start",     description="🔄 Setup / Change language"),
         BotCommand(command="horoscope", description="🔮 Today's Vedic horoscope"),
         BotCommand(command="kundli",    description="🔯 Your birth chart"),
         BotCommand(command="panchang",  description="📅 Today's Panchang"),
         BotCommand(command="ask",       description="🙏 Ask astrology AI (3 free)"),
-        BotCommand(command="spiritual", description="🕉️ Daily spiritual guidance"),
+        BotCommand(command="match",     description="💑 Kundli matching"),
+        BotCommand(command="dosha",     description="⚠️ Dosha analysis"),
+        BotCommand(command="remedy",    description="🕉️ Personal remedies"),
+        BotCommand(command="lucky",     description="🍀 Lucky numbers, colors, gems"),
+        BotCommand(command="spiritual", description="🌸 Daily spiritual guidance"),
         BotCommand(command="sign",      description="♈ Zodiac sign info"),
     ])
 
