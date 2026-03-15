@@ -62,6 +62,10 @@ T = {
         ),
         # /spiritual
         "spiritual_header": "🕉️ *Daily Spiritual Guidance — {date}*\n\n",
+        # Phase 3
+        "career_wait": "💼 Analyzing your career chart...",
+        "marriage_wait": "💑 Analyzing your marriage chart...",
+        "wealth_wait": "💰 Analyzing your wealth chart...",
         # Skip button
         "skip": "Skip",
         "male": "Male ♂", "female": "Female ♀", "skip_gender": "Prefer not to say",
@@ -128,6 +132,10 @@ T = {
         ),
         # /spiritual
         "spiritual_header": "🕉️ *दैनिक आध्यात्मिक मार्गदर्शन — {date}*\n\n",
+        # Phase 3
+        "career_wait": "💼 करियर कुंडली का विश्लेषण हो रहा है...",
+        "marriage_wait": "💑 विवाह कुंडली का विश्लेषण हो रहा है...",
+        "wealth_wait": "💰 धन कुंडली का विश्लेषण हो रहा है...",
         # Buttons
         "skip": "छोड़ें",
         "male": "पुरुष ♂", "female": "महिला ♀", "skip_gender": "बताना नहीं",

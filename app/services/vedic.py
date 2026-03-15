@@ -3,7 +3,7 @@ Vedic astrology calculations: Guna Milan, Dosha detection, remedies.
 """
 from datetime import date, time
 
-from app.services.astrology import get_kundli, NAKSHATRAS
+from app.services.astrology import get_kundli, NAKSHATRAS, DASHA_YEARS, DASHA_ORDER
 
 # ── Guna Milan ────────────────────────────────────────────────────────────────
 
@@ -205,6 +205,198 @@ _DASHA_REMEDIES = {
     "Rahu":    "Worship Durga/Kali. Chant Durga Saptashati. Keep camphor at home.",
     "Ketu":    "Worship Lord Ganesha. Chant Ganesha Atharvashirsha.",
 }
+
+
+# ── Career Analysis ───────────────────────────────────────────────────────────
+
+_CAREER_BY_SIGN = {
+    "Aries": "Leadership, military, sports, engineering, entrepreneurship",
+    "Taurus": "Finance, banking, arts, music, food industry, luxury goods",
+    "Gemini": "Communication, media, writing, IT, teaching, sales",
+    "Cancer": "Healthcare, food, real estate, hospitality, public service",
+    "Leo": "Administration, politics, entertainment, management, government",
+    "Virgo": "Healthcare, analysis, accounting, service industry, research",
+    "Libra": "Law, diplomacy, fashion, arts, counseling, partnerships",
+    "Scorpio": "Research, detective work, surgery, psychology, occult sciences",
+    "Sagittarius": "Teaching, law, religion, philosophy, travel, publishing",
+    "Capricorn": "Corporate, engineering, government, real estate, management",
+    "Aquarius": "Technology, NGOs, astrology, aviation, research, social work",
+    "Pisces": "Spirituality, medicine, arts, film, charity, maritime",
+}
+
+
+def career_analysis(kundli: dict) -> dict:
+    houses = kundli["houses"]
+    planets = kundli["planets"]
+
+    tenth_sign = houses[9]
+    tenth_lord = _SIGN_LORD.get(tenth_sign, "")
+
+    planets_in_10th = [p for p, (sign, _, _) in planets.items() if sign == tenth_sign]
+
+    sun_sign = planets["Sun"][0]
+    saturn_sign = planets["Saturn"][0]
+    sun_house = houses.index(sun_sign) + 1 if sun_sign in houses else 0
+    saturn_house = houses.index(saturn_sign) + 1 if saturn_sign in houses else 0
+
+    tenth_lord_sign = "Unknown"
+    if tenth_lord and tenth_lord in planets:
+        tenth_lord_sign = planets[tenth_lord][0]
+
+    return {
+        "tenth_sign": tenth_sign,
+        "tenth_lord": tenth_lord,
+        "tenth_lord_sign": tenth_lord_sign,
+        "planets_in_10th": planets_in_10th,
+        "career_domains": _CAREER_BY_SIGN.get(tenth_sign, "Diverse opportunities"),
+        "current_dasha": kundli["current_dasha"],
+        "dasha_years_left": kundli["dasha_years_left"],
+        "sun_house": sun_house,
+        "saturn_house": saturn_house,
+    }
+
+
+# ── Marriage Analysis ──────────────────────────────────────────────────────────
+
+def marriage_analysis(kundli: dict) -> dict:
+    houses = kundli["houses"]
+    planets = kundli["planets"]
+
+    seventh_sign = houses[6]
+    seventh_lord = _SIGN_LORD.get(seventh_sign, "")
+
+    seventh_lord_house = 0
+    if seventh_lord and seventh_lord in planets:
+        sl_sign = planets[seventh_lord][0]
+        seventh_lord_house = houses.index(sl_sign) + 1 if sl_sign in houses else 0
+
+    planets_in_7th = [p for p, (sign, _, _) in planets.items() if sign == seventh_sign]
+
+    venus_sign = planets["Venus"][0]
+    venus_house = houses.index(venus_sign) + 1 if venus_sign in houses else 0
+    jupiter_sign = planets["Jupiter"][0]
+    jupiter_house = houses.index(jupiter_sign) + 1 if jupiter_sign in houses else 0
+
+    mars_sign = planets["Mars"][0]
+    mars_house = houses.index(mars_sign) + 1 if mars_sign in houses else 0
+    is_manglik = mars_house in (1, 4, 7, 8, 12)
+
+    return {
+        "seventh_sign": seventh_sign,
+        "seventh_lord": seventh_lord,
+        "seventh_lord_house": seventh_lord_house,
+        "planets_in_7th": planets_in_7th,
+        "venus_house": venus_house,
+        "jupiter_house": jupiter_house,
+        "mars_house": mars_house,
+        "is_manglik": is_manglik,
+        "current_dasha": kundli["current_dasha"],
+        "dasha_years_left": kundli["dasha_years_left"],
+    }
+
+
+# ── Wealth Analysis ────────────────────────────────────────────────────────────
+
+_WEALTH_BY_SIGN = {
+    "Aries": "Self-earned wealth through initiative and enterprise",
+    "Taurus": "Wealth through land, assets, arts, and steady accumulation",
+    "Gemini": "Wealth through trade, communication, and multiple income streams",
+    "Cancer": "Wealth through real estate, family business, and inheritance",
+    "Leo": "Wealth through government, management, and status positions",
+    "Virgo": "Wealth through service, healthcare, and careful savings",
+    "Libra": "Wealth through partnerships, law, and luxury trade",
+    "Scorpio": "Wealth through research, hidden sources, and transformation",
+    "Sagittarius": "Wealth through knowledge, teaching, and foreign connections",
+    "Capricorn": "Wealth through hard work, corporate, and long-term investments",
+    "Aquarius": "Wealth through technology, groups, and unconventional methods",
+    "Pisces": "Wealth through spirituality, arts, and charitable activities",
+}
+
+
+def wealth_analysis(kundli: dict) -> dict:
+    houses = kundli["houses"]
+    planets = kundli["planets"]
+
+    # 2nd house (savings)
+    second_sign = houses[1]
+    second_lord = _SIGN_LORD.get(second_sign, "")
+    second_lord_house = 0
+    if second_lord and second_lord in planets:
+        sl_sign = planets[second_lord][0]
+        second_lord_house = houses.index(sl_sign) + 1 if sl_sign in houses else 0
+
+    # 11th house (gains)
+    eleventh_sign = houses[10]
+    eleventh_lord = _SIGN_LORD.get(eleventh_sign, "")
+    eleventh_lord_house = 0
+    if eleventh_lord and eleventh_lord in planets:
+        el_sign = planets[eleventh_lord][0]
+        eleventh_lord_house = houses.index(el_sign) + 1 if el_sign in houses else 0
+
+    jupiter_sign = planets["Jupiter"][0]
+    jupiter_house = houses.index(jupiter_sign) + 1 if jupiter_sign in houses else 0
+    venus_sign = planets["Venus"][0]
+    venus_house = houses.index(venus_sign) + 1 if venus_sign in houses else 0
+
+    planets_in_2nd = [p for p, (sign, _, _) in planets.items() if sign == second_sign]
+    planets_in_11th = [p for p, (sign, _, _) in planets.items() if sign == eleventh_sign]
+
+    return {
+        "second_sign": second_sign,
+        "second_lord": second_lord,
+        "second_lord_house": second_lord_house,
+        "eleventh_sign": eleventh_sign,
+        "eleventh_lord": eleventh_lord,
+        "eleventh_lord_house": eleventh_lord_house,
+        "jupiter_house": jupiter_house,
+        "venus_house": venus_house,
+        "planets_in_2nd": planets_in_2nd,
+        "planets_in_11th": planets_in_11th,
+        "wealth_nature": _WEALTH_BY_SIGN.get(second_sign, "Varied financial prospects"),
+        "current_dasha": kundli["current_dasha"],
+        "dasha_years_left": kundli["dasha_years_left"],
+    }
+
+
+# ── Dasha Timeline ─────────────────────────────────────────────────────────────
+
+def get_dasha_timeline(kundli: dict) -> list[dict]:
+    """Returns current + next 5 dasha periods with approximate dates."""
+    from datetime import datetime, timedelta
+
+    current = kundli["current_dasha"]
+    years_left = kundli["dasha_years_left"]
+
+    today = datetime.now()
+    current_end = today + timedelta(days=years_left * 365.25)
+    current_start = current_end - timedelta(days=DASHA_YEARS[current] * 365.25)
+
+    timeline = [{
+        "planet": current,
+        "start": current_start.date(),
+        "end": current_end.date(),
+        "years": DASHA_YEARS[current],
+        "is_current": True,
+    }]
+
+    idx = DASHA_ORDER.index(current)
+    running_end = current_end
+    for _ in range(5):
+        idx = (idx + 1) % 9
+        planet = DASHA_ORDER[idx]
+        d_years = DASHA_YEARS[planet]
+        start = running_end
+        end = running_end + timedelta(days=d_years * 365.25)
+        timeline.append({
+            "planet": planet,
+            "start": start.date(),
+            "end": end.date(),
+            "years": d_years,
+            "is_current": False,
+        })
+        running_end = end
+
+    return timeline
 
 
 def get_remedies(kundli: dict) -> dict:

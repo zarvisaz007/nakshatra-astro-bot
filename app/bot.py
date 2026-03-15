@@ -11,6 +11,7 @@ from app.config import settings
 from app.database import create_tables
 from app.handlers import start, horoscope, chart, sign, panchang, ask, spiritual
 from app.handlers import match, dosha, remedy, lucky
+from app.handlers import career, marriage, wealth, dasha
 
 logging.basicConfig(
     level=logging.INFO,
@@ -41,6 +42,10 @@ async def main() -> None:
     dp.include_router(dosha.router)
     dp.include_router(remedy.router)
     dp.include_router(lucky.router)
+    dp.include_router(career.router)
+    dp.include_router(marriage.router)
+    dp.include_router(wealth.router)
+    dp.include_router(dasha.router)
 
     await bot.set_my_commands([
         BotCommand(command="start",     description="🔄 Setup / Change language"),
@@ -54,6 +59,10 @@ async def main() -> None:
         BotCommand(command="lucky",     description="🍀 Lucky numbers, colors, gems"),
         BotCommand(command="spiritual", description="🌸 Daily spiritual guidance"),
         BotCommand(command="sign",      description="♈ Zodiac sign info"),
+        BotCommand(command="career",    description="💼 Career astrology"),
+        BotCommand(command="marriage",  description="💑 Marriage prediction"),
+        BotCommand(command="wealth",    description="💰 Wealth & finance astrology"),
+        BotCommand(command="dasha",     description="🌀 Vimshottari Dasha timeline"),
     ])
 
     logger.info("Starting bot @Nakshatra_Astrobot...")

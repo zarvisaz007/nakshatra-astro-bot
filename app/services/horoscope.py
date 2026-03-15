@@ -63,6 +63,59 @@ _SPIRITUAL_PROMPT = {
     ),
 }
 
+_CAREER_PROMPT = {
+    "en": (
+        "You are a Vedic astrologer. Career analysis for {name}. "
+        "Lagna {lagna}, Moon sign {rashi}, 10th house {tenth_sign} (lord: {tenth_lord} in {tenth_lord_sign}), "
+        "current Mahadasha {dasha} ({years_left} years left). "
+        "Career domains suited: {domains}. "
+        "~150 words. Cover: career strengths, best fields, current dasha influence, growth period. "
+        "Vedic, specific, practical. No generic advice."
+    ),
+    "hi": (
+        "आप एक वैदिक ज्योतिषी हैं। {name} का करियर विश्लेषण करें। "
+        "लग्न {lagna}, राशि {rashi}, दसवां भाव {tenth_sign} (स्वामी: {tenth_lord} {tenth_lord_sign} में), "
+        "महादशा {dasha} ({years_left} वर्ष शेष)। "
+        "~150 शब्द। करियर शक्तियां, उचित क्षेत्र, दशा प्रभाव और उन्नति काल बताएं।"
+    ),
+}
+
+_MARRIAGE_PROMPT = {
+    "en": (
+        "You are a Vedic astrologer. Marriage analysis for {name}. "
+        "Lagna {lagna}, Moon sign {rashi}, 7th house {seventh_sign} (lord: {seventh_lord} in house {seventh_lord_house}), "
+        "Venus in house {venus_house}, Jupiter in house {jupiter_house}. "
+        "Manglik: {manglik}. Current Mahadasha: {dasha} ({years_left} yrs left). "
+        "~150 words. Cover: partner qualities, timing for marriage, relationship strengths/challenges. "
+        "Vedic, warm, specific."
+    ),
+    "hi": (
+        "आप एक वैदिक ज्योतिषी हैं। {name} का विवाह विश्लेषण करें। "
+        "लग्न {lagna}, राशि {rashi}, सप्तम भाव {seventh_sign} (स्वामी: {seventh_lord} भाव {seventh_lord_house} में), "
+        "शुक्र भाव {venus_house}, बृहस्पति भाव {jupiter_house}। "
+        "मांगलिक: {manglik}। महादशा: {dasha} ({years_left} वर्ष शेष)। "
+        "~150 शब्द। जीवनसाथी के गुण, विवाह समय, रिश्ते की शक्तियां/चुनौतियां बताएं।"
+    ),
+}
+
+_WEALTH_PROMPT = {
+    "en": (
+        "You are a Vedic astrologer. Wealth analysis for {name}. "
+        "Lagna {lagna}, Moon sign {rashi}, 2nd house {second_sign} (lord: {second_lord}), "
+        "11th house {eleventh_sign} (lord: {eleventh_lord}), "
+        "Jupiter in house {jupiter_house}. Current Mahadasha: {dasha} ({years_left} yrs left). "
+        "~150 words. Cover: wealth potential, income sources, financial challenges, best prosperity period. "
+        "Vedic, specific, actionable."
+    ),
+    "hi": (
+        "आप एक वैदिक ज्योतिषी हैं। {name} का धन विश्लेषण करें। "
+        "लग्न {lagna}, राशि {rashi}, द्वितीय भाव {second_sign} (स्वामी: {second_lord}), "
+        "एकादश भाव {eleventh_sign} (स्वामी: {eleventh_lord}), "
+        "बृहस्पति भाव {jupiter_house} में। महादशा: {dasha} ({years_left} वर्ष शेष)। "
+        "~150 शब्द। धन क्षमता, आय स्रोत, वित्तीय चुनौतियां और समृद्धि काल बताएं।"
+    ),
+}
+
 # Lucky colors by day of week
 _LUCKY_COLORS = ["White", "Pink", "Red", "Green", "Yellow", "Blue", "Purple"]
 _LUCKY_COLORS_HI = ["सफ़ेद", "गुलाबी", "लाल", "हरा", "पीला", "नीला", "बैंगनी"]
@@ -126,6 +179,68 @@ async def ask_ai(question: str, name: str, lagna: str, rashi: str,
         rashi=rashi, nakshatra=nakshatra, dasha=dasha,
     )
     return await _call_ai(prompt)
+
+
+async def get_career_reading(name: str, lagna: str, rashi: str,
+                             career: dict, lang: str = "en") -> str:
+    cache_key = f"career:{lagna}:{career['current_dasha']}:{lang}"
+    today = date.today()
+    cached = await cache.get_horoscope(cache_key, today)
+    if cached:
+        return cached
+    prompt = _CAREER_PROMPT.get(lang, _CAREER_PROMPT["en"]).format(
+        name=name, lagna=lagna, rashi=rashi,
+        tenth_sign=career["tenth_sign"], tenth_lord=career["tenth_lord"],
+        tenth_lord_sign=career["tenth_lord_sign"],
+        dasha=career["current_dasha"], years_left=round(career["dasha_years_left"], 1),
+        domains=career["career_domains"],
+    )
+    result = await _call_ai(prompt)
+    if result:
+        await cache.set_horoscope(cache_key, today, result)
+    return result
+
+
+async def get_marriage_reading(name: str, lagna: str, rashi: str,
+                                marriage: dict, lang: str = "en") -> str:
+    cache_key = f"marriage:{lagna}:{marriage['current_dasha']}:{lang}"
+    today = date.today()
+    cached = await cache.get_horoscope(cache_key, today)
+    if cached:
+        return cached
+    manglik_str = ("Yes" if marriage["is_manglik"] else "No") if lang == "en" else ("हां" if marriage["is_manglik"] else "नहीं")
+    prompt = _MARRIAGE_PROMPT.get(lang, _MARRIAGE_PROMPT["en"]).format(
+        name=name, lagna=lagna, rashi=rashi,
+        seventh_sign=marriage["seventh_sign"], seventh_lord=marriage["seventh_lord"],
+        seventh_lord_house=marriage["seventh_lord_house"],
+        venus_house=marriage["venus_house"], jupiter_house=marriage["jupiter_house"],
+        manglik=manglik_str,
+        dasha=marriage["current_dasha"], years_left=round(marriage["dasha_years_left"], 1),
+    )
+    result = await _call_ai(prompt)
+    if result:
+        await cache.set_horoscope(cache_key, today, result)
+    return result
+
+
+async def get_wealth_reading(name: str, lagna: str, rashi: str,
+                              wealth: dict, lang: str = "en") -> str:
+    cache_key = f"wealth:{lagna}:{wealth['current_dasha']}:{lang}"
+    today = date.today()
+    cached = await cache.get_horoscope(cache_key, today)
+    if cached:
+        return cached
+    prompt = _WEALTH_PROMPT.get(lang, _WEALTH_PROMPT["en"]).format(
+        name=name, lagna=lagna, rashi=rashi,
+        second_sign=wealth["second_sign"], second_lord=wealth["second_lord"],
+        eleventh_sign=wealth["eleventh_sign"], eleventh_lord=wealth["eleventh_lord"],
+        jupiter_house=wealth["jupiter_house"],
+        dasha=wealth["current_dasha"], years_left=round(wealth["dasha_years_left"], 1),
+    )
+    result = await _call_ai(prompt)
+    if result:
+        await cache.set_horoscope(cache_key, today, result)
+    return result
 
 
 async def get_spiritual_guidance(moon_sign: str, nakshatra: str,
