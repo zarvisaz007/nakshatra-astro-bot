@@ -5,6 +5,7 @@ from aiogram.filters import Command
 from aiogram.types import Message
 
 from app.database import AsyncSessionFactory
+from app.i18n import t
 from app.services import user as user_service
 from app.services.astrology import get_natal_chart
 
@@ -17,11 +18,13 @@ async def cmd_chart(message: Message) -> None:
     async with AsyncSessionFactory() as session:
         u = await user_service.get_or_create(session, message.from_user.id)
 
+    lang = u.language or "en"
+
     if not u.is_onboarded:
-        await message.answer("You haven't set up your profile yet. Run /start to get started!")
+        await message.answer(t(lang, "no_profile"))
         return
 
-    await message.answer("Calculating your natal chart... 🔭")
+    await message.answer(t(lang, "generating"))
 
     try:
         chart_text = get_natal_chart(
@@ -33,7 +36,7 @@ async def cmd_chart(message: Message) -> None:
         )
     except Exception:
         logger.exception("Failed to calculate chart for user %s", u.telegram_id)
-        await message.answer("Something went wrong calculating your chart. Try again in a moment.")
+        await message.answer(t(lang, "chart_error"))
         return
 
     await message.answer(chart_text, parse_mode="Markdown")

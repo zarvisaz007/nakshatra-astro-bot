@@ -11,6 +11,7 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True, index=True)
+    language: Mapped[str] = mapped_column(String(5), server_default="en")
     birth_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     birth_time: Mapped[time | None] = mapped_column(Time, nullable=True)
     birth_lat: Mapped[float | None] = mapped_column(Float, nullable=True)
