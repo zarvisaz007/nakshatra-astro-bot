@@ -1,6 +1,6 @@
 from datetime import date, datetime, time
 
-from sqlalchemy import BigInteger, Date, DateTime, Float, Integer, String, Time, func
+from sqlalchemy import BigInteger, Boolean, Date, DateTime, Float, Integer, String, Time, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -22,6 +22,7 @@ class User(Base):
     timezone: Mapped[str | None] = mapped_column(String(50), nullable=True)
     free_questions_used: Mapped[int] = mapped_column(Integer, server_default="0")
     subscription_tier: Mapped[str] = mapped_column(String(20), server_default="free")  # free/basic/premium/elite
+    notifications_enabled: Mapped[bool] = mapped_column(Boolean, server_default="1")
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     FREE_QUESTION_LIMIT = 3

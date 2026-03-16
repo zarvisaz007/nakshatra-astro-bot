@@ -13,6 +13,8 @@ from app.handlers import start, horoscope, chart, sign, panchang, ask, spiritual
 from app.handlers import match, dosha, remedy, lucky
 from app.handlers import career, marriage, wealth, dasha
 from app.handlers import puja, mantra, gems
+from app.handlers import numerology, dream, palm, notifications
+from app.services.scheduler import run_scheduler
 
 logging.basicConfig(
     level=logging.INFO,
@@ -50,6 +52,10 @@ async def main() -> None:
     dp.include_router(puja.router)
     dp.include_router(mantra.router)
     dp.include_router(gems.router)
+    dp.include_router(numerology.router)
+    dp.include_router(dream.router)
+    dp.include_router(palm.router)
+    dp.include_router(notifications.router)
 
     await bot.set_my_commands([
         BotCommand(command="start",     description="🔄 Setup / Change language"),
@@ -69,8 +75,15 @@ async def main() -> None:
         BotCommand(command="dasha",     description="🌀 Vimshottari Dasha timeline"),
         BotCommand(command="puja",      description="🕉️ Puja recommendations"),
         BotCommand(command="mantra",    description="🔱 Personal mantra sadhana"),
-        BotCommand(command="gems",      description="💎 Gemstone recommendations"),
+        BotCommand(command="gems",          description="💎 Gemstone recommendations"),
+        BotCommand(command="numerology",    description="🔢 Vedic numerology reading"),
+        BotCommand(command="dream",         description="🌙 Dream interpretation"),
+        BotCommand(command="palmreading",   description="🖐️ Palm reading (send photo)"),
+        BotCommand(command="notifications", description="🔔 Toggle daily notifications"),
     ])
+
+    asyncio.create_task(run_scheduler(bot))
+    logger.info("Scheduler started")
 
     logger.info("Starting bot @Nakshatra_Astrobot...")
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())

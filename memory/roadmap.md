@@ -40,20 +40,20 @@
 
 ---
 
-## Phase 4 — Spiritual Services
+## Phase 4 — Spiritual Services ✅ COMPLETE
 
-- [ ] Puja recommendations (Shani, Navagraha, etc.)
-- [ ] Personalized Mantra Sadhana
-- [ ] Gemstone recommendation
-- [ ] Temple puja booking (partner integration)
+- [x] /puja — dasha-based puja + Navagraha/Mangal/Shani Shanti/Kaal Sarp special pujas + AI reading
+- [x] /mantra — nakshatra lord beeja mantra + dasha mantra + element-based sadhana tips + AI reading
+- [x] /gems — lagna lord primary gem + supporting gems + gems to avoid + AI reading
+- [ ] Temple puja booking (skipped — requires partner integration)
 
 ---
 
-## Phase 5 — AI Enhanced
+## Phase 5 — AI Enhanced ✅ COMPLETE
 
-- [ ] Palm reading (image upload)
-- [ ] Dream interpretation
-- [ ] Numerology AI
+- [x] Palm reading (image upload) — `/palmreading`, vision AI (llama-3.2-11b-vision)
+- [x] Dream interpretation — `/dream`, FSM, Vedic symbolism + kundli context
+- [x] Numerology AI — `/numerology`, Chaldean + Vedic planets, Redis cached
 
 ---
 
@@ -66,12 +66,13 @@
 
 ---
 
-## Phase 7 — Retention
+## Phase 7 — Retention ✅ COMPLETE
 
-- [ ] Scheduled daily horoscope push
-- [ ] Transit alerts
-- [ ] Festival/Ekadashi reminders
-- [ ] Weekly digest
+- [x] Scheduled daily horoscope push — 7 AM IST daily to opted-in users
+- [x] Transit alerts — moon nakshatra change alerts
+- [x] Festival/Ekadashi reminders — 1 day before major Hindu festivals
+- [x] Weekly digest — Monday 5 AM UTC AI-generated weekly outlook
+- [x] `/notifications` — user toggle for notifications (default: on)
 
 ---
 
