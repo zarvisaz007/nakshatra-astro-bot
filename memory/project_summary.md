@@ -1,42 +1,91 @@
-# Project Summary
+# Project Summary — Nakshatra Astro Bot
 
-## What It Does
+## What It Is
 
-An astrology Telegram bot that:
-1. Collects the user's birth data (date, time, location) on first use
-2. Generates a personalized daily horoscope using Claude AI
-3. Calculates and presents the user's natal chart (planetary positions + aspects)
-4. Supports quick sign lookups without requiring an account
+**Nakshatra Astro** (`@Nakshatra_Astrobot`) is a full-featured AI Vedic astrology Telegram bot for the Indian market.
+
+- 24 commands covering the complete Vedic astrology experience
+- Hindi + English bilingual support
+- Vedic/sidereal (Lahiri) calculations via kerykeion
+- AI readings via OpenRouter GLM 4.5 Air (free tier)
+- Shareable image cards for viral growth
+- Background scheduler for daily retention pushes
 
 ## Goals
 
-- Deliver genuinely useful, AI-quality horoscope readings (not canned text)
-- Keep Claude API costs minimal via Redis caching (12 calls/day max regardless of user count)
-- Run cheaply at scale — Railway free tier viable for early growth
-- Be privacy-conscious: birth data stored locally, never sold
-
-## Scope
-
-**In scope (MVP):**
-- Telegram bot interface only
-- Daily sun-sign horoscope (cached per sign, not per user)
-- Natal chart text summary
-- User profile with birth data storage
-
-**Out of scope (for now):**
-- Web interface
-- Push notifications / proactive alerts
-- Payment processing
-- PDF exports
+- Deliver genuine Vedic astrology value — not canned text
+- Keep AI costs minimal via Redis caching (most heavy commands: <50 AI calls/day regardless of users)
+- Retain users via daily horoscope push, transit alerts, festival reminders
+- Drive viral growth via shareable destiny and compatibility card images
+- Monetize via subscription tiers (Phase 6 — not yet built)
 
 ## Target Users
 
-- Astrology enthusiasts who check their horoscope daily
-- Curious users who want to understand their natal chart
-- Telegram-native users who prefer bots to apps
+- Daily horoscope checkers (Indian, 18–45)
+- People planning life decisions (career, marriage, business) using astrology
+- Parents looking for baby name numerology / kundli matching
+- Spiritually inclined users seeking mantras, pujas, remedies
+- Telegram-native users who prefer bots over apps
 
-## Success Metrics
+## Current Feature Set
 
-- User retention: >30% return after day 1
-- Cost: <$5/month in Claude API costs for first 1,000 users
-- Uptime: >99% (Railway SLA)
+### Core Astrology
+- Full Vedic kundli (lagna, rashi, nakshatra+pada, all planets, dasha)
+- Daily horoscope with lucky number + color
+- Panchang (Tithi, Rahu Kaal, Abhijit Muhurat)
+- Vimshottari Dasha timeline
+
+### Compatibility & Relationships
+- Guna Milan (0–36 score, all 8 gunas)
+- Dosha detection (Manglik, Kaal Sarp, Shani, Pitru)
+- Marriage prediction (7th house + AI)
+
+### Life Areas
+- Career analysis (10th house + AI)
+- Wealth analysis (2nd/11th house + AI)
+- Lucky numbers, colors, gemstones, name letters
+
+### Spiritual Services
+- Personal remedies (mantra, donation, fasting)
+- Puja recommendations (dasha-based + Navagraha)
+- Nakshatra beeja mantra + sadhana
+- Gemstone recommendations (lagna lord + supporting)
+
+### AI Enhanced (Phase 5)
+- Chaldean numerology with Vedic planetary mapping
+- Vedic dream interpretation
+- Palm reading via photo upload (vision AI)
+
+### Retention (Phase 7)
+- Daily horoscope push at 7 AM IST to opted-in users
+- Moon nakshatra transit alerts
+- Festival + Ekadashi reminders
+- Weekly astrology digest every Monday
+
+### Viral Growth (Phase 8)
+- Shareable destiny report card (900×500 image)
+- Shareable compatibility card image
+- Life milestones + dasha age forecast
+
+## What's NOT Built Yet
+
+- **Phase 6: Subscriptions** — ₹199/₹499/₹999 tiers, Razorpay payment, feature gates
+- Temple puja booking (requires partner integration)
+- PDF report generation
+- Web interface
+
+## Success Metrics (targets)
+
+- User retention: >30% return after day 1 (daily push helps)
+- Viral coefficient: >0.3 (shareable cards)
+- AI cost: <₹500/month for first 10,000 users (heavy Redis caching)
+- Uptime: >99%
+
+## Revenue Model (when Phase 6 is built)
+
+| Tier | Price | Features |
+|------|-------|---------|
+| Free | ₹0 | All commands, 3 /ask questions |
+| Basic | ₹199/mo | Unlimited /ask |
+| Premium | ₹499/mo | All Basic + priority AI |
+| Elite | ₹999/mo | All Premium + personal astrologer chat |

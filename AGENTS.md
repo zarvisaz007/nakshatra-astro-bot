@@ -1,84 +1,102 @@
 # AGENTS.md — Multi-Agent Collaboration Guide
 
-> For AI agents (Codex, Devin, Cursor, Copilot Workspace, etc.) working on this project.
-> Also read: CLAUDE.md for full onboarding context.
+> For AI agents (Claude Code, Codex, Cursor, Copilot, etc.) working on this project.
+> **Read CLAUDE.md first** — it has the full onboarding, file structure, and rules.
 
-## Project Snapshot
+## Project State
 
-**Astrology Telegram Bot** — Python, aiogram 3.x, kerykeion, Claude API, Redis, SQLAlchemy async.
+**Nakshatra Astro** — Phases 1–5, 7, 8 complete. 24 commands live.
+**Phase 6 (Subscriptions)** is the only remaining phase.
 
-**Bootstrap complete. No application code exists yet.** All files in `memory/` are specs and design docs, not implemented features.
+All code is implemented and running. Do NOT rewrite existing features. Read before touching.
+
+---
 
 ## Repository Layout
 
 ```
 claude-terminal/
-├── CLAUDE.md          ← Full agent onboarding (read this too)
-├── AGENTS.md          ← This file
+├── CLAUDE.md          ← FULL agent onboarding — READ THIS FIRST
+├── AGENTS.md          ← This file (multi-agent guide)
 ├── MEMORY.md          ← Index of memory/ docs
 ├── README.md          ← Human-facing overview
-├── .gitignore
-└── memory/
-    ├── project_summary.md   ← Goals, scope, users
-    ├── architecture.md      ← Stack + ASCII data flow diagrams
-    ├── decisions.md         ← ADRs (why each technology was chosen)
-    ├── requirements.md      ← Functional + non-functional requirements
-    └── roadmap.md           ← Phase 1 checklist → Phase 2 → Phase 3
+├── requirements.txt   ← All pinned deps including Pillow
+├── .env               ← Secrets (not in git)
+├── app/               ← All bot code (see CLAUDE.md for full tree)
+├── memory/
+│   ├── project_summary.md   ← Goals, scope, users, revenue model
+│   ├── architecture.md      ← Stack, component map, DB schema, Redis keys
+│   ├── decisions.md         ← ADRs 001–010 (why each tech was chosen)
+│   ├── requirements.md      ← All functional + non-functional requirements
+│   └── roadmap.md           ← Phase checklist (Phases 1–8)
+└── venv/              ← Python virtualenv (do not commit)
 ```
 
-## Task Queue (Phase 1 — do these in order)
+---
 
-- [ ] `requirements.txt` — pinned deps (aiogram, kerykeion, anthropic, sqlalchemy, aiosqlite, asyncpg, redis, pydantic-settings)
-- [ ] `.env.example` — template with all required vars
-- [ ] `app/__init__.py`
-- [ ] `app/config.py` — pydantic-settings, reads from .env
-- [ ] `app/database.py` — async engine + session factory
-- [ ] `app/models/__init__.py`
-- [ ] `app/models/user.py` — User SQLAlchemy model
-- [ ] `app/services/__init__.py`
-- [ ] `app/services/cache.py` — Redis get/set with midnight TTL
-- [ ] `app/services/astrology.py` — kerykeion: sun sign from DOB, natal chart text
-- [ ] `app/services/horoscope.py` — Claude API call, uses cache service
-- [ ] `app/handlers/__init__.py`
-- [ ] `app/handlers/start.py` — aiogram FSM onboarding (collect DOB, time, location)
-- [ ] `app/handlers/horoscope.py` — /horoscope command
-- [ ] `app/handlers/chart.py` — /chart command
-- [ ] `app/handlers/sign.py` — /sign [zodiac] command
-- [ ] `app/bot.py` — entry point: dispatcher + router wiring, startup/shutdown hooks
+## Rules for Agents
 
-## Key Interfaces to Implement
+### Critical
+1. **Vedic only** — `zodiac_type="Sidereal"`, `sidereal_mode="LAHIRI"` always
+2. **Async everywhere** — no blocking calls in handlers; Pillow → `run_in_executor`
+3. **Cache before AI** — check Redis before every OpenRouter call
+4. **Thin handlers** — logic lives in `services/`, handlers orchestrate only
+5. **GLM max_tokens=800** — never lower; it's a thinking model
+6. **Delete astro.db when adding columns** — no migration tooling
 
-### HoroscopeService
+### Style
+- New handlers: follow pattern in `app/handlers/gems.py` (Phase 4 reference)
+- New AI services: follow pattern in `app/services/horoscope.py` (_call_ai reuse)
+- New image features: follow pattern in `app/services/card_service.py`
+- Phases 5–8 strings: inline `_STRINGS = {"en": {...}, "hi": {...}}` dict per handler
+- No payment code until explicitly asked
+
+---
+
+## How Handlers Are Wired
+
+Every handler needs 3 things in `app/bot.py`:
 ```python
-async def get_reading(sign: str, date: date) -> str:
-    # 1. Check Redis: horoscope:{sign}:{date}
-    # 2. Cache hit → return
-    # 3. Cache miss → call Claude claude-haiku-4-5
-    # 4. Store in Redis with TTL = seconds until midnight UTC
-    # 5. Return reading
+# 1. Import
+from app.handlers import my_handler
+
+# 2. Register router
+dp.include_router(my_handler.router)
+
+# 3. Add bot command
+BotCommand(command="mycommand", description="..."),
 ```
 
-### AstrologyService
-```python
-def get_sun_sign(birth_date: date) -> str: ...
-def get_natal_chart(birth_date: date, birth_time: time | None, lat: float, lon: float) -> str: ...
+---
+
+## Phase 6 — What Needs to Be Built
+
+**Subscriptions** (not yet started):
+
+```
+app/
+├── handlers/
+│   └── subscription.py     — /subscribe command, tier selection
+├── services/
+│   └── payment_service.py  — Razorpay webhook handling, tier upgrade
 ```
 
-### UserService
-```python
-async def get_or_create(telegram_id: int) -> User: ...
-async def update_birth_data(telegram_id: int, **kwargs) -> User: ...
-```
+User model already has `subscription_tier` column (`free/basic/premium/elite`).
+`/ask` already checks `subscription_tier` for unlimited questions.
 
-## Constraints
+Steps:
+1. Razorpay integration (or Stripe for international)
+2. `/subscribe` command with inline keyboard (Basic / Premium / Elite)
+3. Payment webhook → update `subscription_tier` in DB
+4. Feature gates: `/ask` unlimited for non-free, `/dream` limited for free, etc.
 
-- **Async everywhere** — aiogram 3.x requires it; no `asyncio.run()` inside handlers
-- **Cache before Claude** — never call Claude without checking Redis first
-- **Thin handlers** — handlers call services, services contain logic
-- **Environment config only** — all secrets/config via pydantic-settings from `.env`
+---
 
 ## After Completing Work
 
-1. Check off completed items in `memory/roadmap.md`
-2. If you made a tech decision not covered in `memory/decisions.md`, add an ADR
-3. Commit with descriptive messages: `feat: implement horoscope caching service`
+1. Check off items in `memory/roadmap.md`
+2. Add ADR to `memory/decisions.md` if a new tech choice was made
+3. Update `CLAUDE.md` "Current State" section if a new phase is completed
+4. Commit: `feat:` / `fix:` / `chore:` prefix
+5. Push: `git push origin main`
+6. Restart bot: `pkill -f app.bot && rm astro.db && venv/bin/python -m app.bot &`
