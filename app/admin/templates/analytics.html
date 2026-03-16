@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Analytics{% endblock %}
+{% block content %}
+<h1>Analytics</h1>
+
+<div class="grid-2">
+
+  {# ── User growth ── #}
+  <div class="card">
+    <h2>New Users — Last 14 Days</h2>
+    {% set max_g = user_growth | map(attribute=1) | max | default(1) %}
+    {% set max_g = [max_g, 1] | max %}
+    <div class="bar-chart" style="height:100px">
+      {% for label, val in user_growth %}
+      <div class="bar-col">
+        <div class="bar-val" style="font-size:9px">{% if val > 0 %}{{ val }}{% endif %}</div>
+        <div class="bar" style="height:{{ [val * 80 // max_g, 2] | max }}px;background:{% if val > 0 %}#4ade8055{% else %}#2a2a4a{% endif %}"></div>
+        <div class="bar-label" style="font-size:9px">{{ label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {# ── AI calls ── #}
+  <div class="card">
+    <h2>AI API Calls — Last 14 Days</h2>
+    {% set max_ai = ai_7days | map(attribute=1) | max | default(1) %}
+    {% set max_ai = [max_ai, 1] | max %}
+    <div class="bar-chart" style="height:100px">
+      {% for label, val in ai_7days %}
+      <div class="bar-col">
+        <div class="bar-val" style="font-size:9px">{% if val > 0 %}{{ val }}{% endif %}</div>
+        <div class="bar" style="height:{{ [val * 80 // max_ai, 2] | max }}px;background:{% if val > 0 %}#fbbf2455{% else %}#2a2a4a{% endif %}"></div>
+        <div class="bar-label" style="font-size:9px">{{ label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="muted" style="margin-top:8px;font-size:11px">Each bar = one day's OpenRouter API calls.</p>
+  </div>
+
+</div>
+
+<div class="grid-2">
+
+  {# ── Command usage total ── #}
+  <div class="card">
+    <h2>All-Time Command Usage (Top 15)</h2>
+    {% if cmd_total %}
+    {% set max_ct = cmd_total[0][1] | default(1) %}
+    {% set max_ct = [max_ct, 1] | max %}
+    {% for cmd, count in cmd_total %}
+    <div class="hbar-row">
+      <div class="hbar-label">/{{ cmd }}</div>
+      <div class="hbar-track"><div class="hbar-fill" style="width:{{ count * 100 // max_ct }}%"></div></div>
+      <div class="hbar-val">{{ count }}</div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p class="muted">No data yet — will populate as users interact with the bot.</p>
+    {% endif %}
+  </div>
+
+  {# ── Command usage today ── #}
+  <div class="card">
+    <h2>Today's Command Usage</h2>
+    {% if cmd_today %}
+    {% set max_cd = cmd_today[0][1] | default(1) %}
+    {% set max_cd = [max_cd, 1] | max %}
+    {% for cmd, count in cmd_today %}
+    <div class="hbar-row">
+      <div class="hbar-label">/{{ cmd }}</div>
+      <div class="hbar-track"><div class="hbar-fill" style="width:{{ count * 100 // max_cd }}%"></div></div>
+      <div class="hbar-val">{{ count }}</div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p class="muted">No commands tracked today yet.</p>
+    {% endif %}
+  </div>
+
+</div>
+
+<div class="grid-2">
+
+  {# ── Subscription breakdown ── #}
+  <div class="card">
+    <h2>Subscription Tiers</h2>
+    {% set total_t = (tier_map.values() | sum) | default(1) %}
+    {% set total_t = [total_t, 1] | max %}
+    {% for tier in ['free','basic','premium','elite'] %}
+    {% set cnt = tier_map[tier] | default(0) %}
+    <div class="hbar-row">
+      <div class="hbar-label"><span class="badge badge-{{ tier }}">{{ tier }}</span></div>
+      <div class="hbar-track"><div class="hbar-fill" style="width:{{ cnt * 100 // total_t }}%"></div></div>
+      <div class="hbar-val">{{ cnt }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {# ── Language breakdown ── #}
+  <div class="card">
+    <h2>Language Distribution</h2>
+    {% set total_l = (lang_map.values() | sum) | default(1) %}
+    {% set total_l = [total_l, 1] | max %}
+    {% for lang, cnt in lang_map.items() %}
+    <div class="hbar-row">
+      <div class="hbar-label"><span class="badge badge-{{ lang }}">{{ lang.upper() }}</span></div>
+      <div class="hbar-track"><div class="hbar-fill" style="width:{{ cnt * 100 // total_l }}%"></div></div>
+      <div class="hbar-val">{{ cnt }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

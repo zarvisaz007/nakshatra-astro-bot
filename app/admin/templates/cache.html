@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Redis Monitor{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+  <h1 style="margin:0">Redis Monitor</h1>
+  <span>
+    <span class="dot {% if redis_ok %}dot-green{% else %}dot-red{% endif %}"></span>
+    <strong>{% if redis_ok %}Connected{% else %}Disconnected{% endif %}</strong>
+  </span>
+</div>
+
+{% if not redis_ok %}
+<div class="alert alert-err">❌ Redis is not reachable. Run: <code>brew services start redis</code></div>
+{% endif %}
+
+{% if info.get('error') %}
+<div class="alert alert-err">Redis error: {{ info.error }}</div>
+{% endif %}
+
+{# ── Server info ── #}
+{% if redis_ok %}
+<div class="stat-grid">
+  <div class="stat"><div class="num">{{ info.version }}</div><div class="label">Redis Version</div></div>
+  <div class="stat"><div class="num">{{ info.uptime_days }}</div><div class="label">Uptime (days)</div></div>
+  <div class="stat"><div class="num blue">{{ info.memory_used }}</div><div class="label">Memory Used</div><div class="sub">peak: {{ info.memory_peak }}</div></div>
+  <div class="stat"><div class="num">{{ info.clients }}</div><div class="label">Connected Clients</div></div>
+  <div class="stat"><div class="num green">{{ info.hit_rate }}</div><div class="label">Cache Hit Rate</div><div class="sub">{{ info.hits }} hits / {{ info.misses }} misses</div></div>
+  <div class="stat"><div class="num">{{ info.total_keys }}</div><div class="label">Total Keys</div></div>
+</div>
+{% endif %}
+
+<div class="grid-2">
+
+  {# ── Key counts by pattern ── #}
+  <div class="card">
+    <h2>Keys by Pattern</h2>
+    <table>
+      <tr><th>Pattern</th><th>Description</th><th style="text-align:right">Keys</th><th></th></tr>
+      {% for kc in key_counts %}
+      <tr>
+        <td><code>{{ kc.pattern }}</code></td>
+        <td class="muted">{{ kc.label }}</td>
+        <td style="text-align:right;font-weight:600;color:#a78bfa">{{ kc.count }}</td>
+        <td>
+          {% if kc.pattern in ['horoscope:*','career:*','marriage:*','wealth:*','spiritual:*','numerology:*','milestones:*'] %}
+          <form method="POST" action="/cache/flush-pattern" style="display:inline">
+            <input type="hidden" name="pattern" value="{{ kc.pattern }}">
+            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Flush {{ kc.pattern }}?')">Flush</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    <p class="muted" style="margin-top:12px;font-size:11px">⚠️ Flushing cache forces fresh AI calls on next request for that feature.</p>
+  </div>
+
+  {# ── AI calls chart ── #}
+  <div class="card">
+    <h2>AI Calls — Last 7 Days</h2>
+    {% set max_ai = ai_calls | map(attribute='count') | max | default(1) %}
+    {% set max_ai = [max_ai, 1] | max %}
+    <div class="bar-chart" style="height:100px;margin-bottom:16px">
+      {% for d in ai_calls %}
+      <div class="bar-col">
+        <div class="bar-val">{% if d.count > 0 %}{{ d.count }}{% endif %}</div>
+        <div class="bar" style="height:{{ [d.count * 80 // max_ai, 2] | max }}px;background:{% if d.count > 0 %}#fbbf2466{% else %}#2a2a4a{% endif %}"></div>
+        <div class="bar-label">{{ d.date }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="muted" style="font-size:11px">Each OpenRouter API call is counted. Cached responses = 0 calls.</p>
+    <hr class="divider">
+    <h3>Cache Efficiency</h3>
+    <p class="muted" style="font-size:12px">
+      Commands like <code>/horoscope</code>, <code>/career</code>, <code>/numerology</code> are cached —
+      they only call the AI once per day per sign/lagna. Commands like <code>/ask</code>, <code>/dream</code>,
+      <code>/palmreading</code> always call the AI (user-unique input).
+    </p>
+  </div>
+
+</div>
+{% endblock %}

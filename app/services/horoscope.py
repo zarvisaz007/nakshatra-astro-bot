@@ -137,6 +137,16 @@ async def _call_ai(prompt: str) -> str:
         max_tokens=800,
         messages=[{"role": "user", "content": prompt}],
     )
+    # Track AI call stats for admin dashboard
+    try:
+        from app.services.cache import get_redis
+        r = get_redis()
+        today = date.today().isoformat()
+        await r.incr(f"stats:ai:calls:{today}")
+        await r.expire(f"stats:ai:calls:{today}", 86400 * 30)
+        await r.incr("stats:ai:calls:total")
+    except Exception:
+        pass
     return (response.choices[0].message.content or "").strip()
 
 

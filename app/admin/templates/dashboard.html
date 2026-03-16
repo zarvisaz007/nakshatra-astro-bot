@@ -1,39 +1,180 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<h1>Dashboard</h1>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+  <h1 style="margin:0">Dashboard</h1>
+  <span class="muted">{{ now if now else "" }}
+    <span class="dot {% if stats.redis_ok %}dot-green{% else %}dot-red{% endif %}"></span>
+    Redis {% if stats.redis_ok %}OK{% else %}DOWN{% endif %}
+    &nbsp;·&nbsp; Model: <code>{{ stats.current_model }}</code>
+  </span>
+</div>
 
+{# ── Hero stats ── #}
 <div class="stat-grid">
-  <div class="stat"><div class="num">{{ stats.total_users }}</div><div class="label">Total Users</div></div>
-  <div class="stat"><div class="num">{{ stats.onboarded }}</div><div class="label">Onboarded</div></div>
-  <div class="stat"><div class="num">{{ stats.hindi_users }}</div><div class="label">Hindi Users</div></div>
-  <div class="stat"><div class="num">{{ stats.english_users }}</div><div class="label">English Users</div></div>
-  <div class="stat"><div class="num">{{ stats.paid_users }}</div><div class="label">Paid Users</div></div>
+  <div class="stat">
+    <div class="num">{{ stats.total_users }}</div>
+    <div class="label">Total Users</div>
+    <div class="sub">+{{ stats.new_today }} today</div>
+  </div>
+  <div class="stat">
+    <div class="num green">{{ stats.new_today }}</div>
+    <div class="label">New Today</div>
+    <div class="sub">+{{ stats.new_week }} this week</div>
+  </div>
+  <div class="stat">
+    <div class="num blue">{{ stats.active_today }}</div>
+    <div class="label">Active Today</div>
+    <div class="sub">sent a command</div>
+  </div>
+  <div class="stat">
+    <div class="num">{{ stats.onboarded }}</div>
+    <div class="label">Onboarded</div>
+    <div class="sub">have birth data</div>
+  </div>
+  <div class="stat">
+    <div class="num amber">{{ stats.notif_users }}</div>
+    <div class="label">Notifications On</div>
+    <div class="sub">receive daily push</div>
+  </div>
+  <div class="stat">
+    <div class="num {% if stats.paid_users > 0 %}green{% else %}{% endif %}">{{ stats.paid_users }}</div>
+    <div class="label">Paid Users</div>
+    <div class="sub">basic/premium/elite</div>
+  </div>
+  <div class="stat">
+    <div class="num">{{ stats.hindi_users }}</div>
+    <div class="label">Hindi Users</div>
+    <div class="sub">{{ stats.english_users }} English</div>
+  </div>
+  <div class="stat">
+    <div class="num amber">{{ stats.ai_today }}</div>
+    <div class="label">AI Calls Today</div>
+    <div class="sub">{{ stats.ai_total }} total</div>
+  </div>
 </div>
 
-<div class="card">
-  <h2>Current Config</h2>
-  <table>
-    <tr><th>Setting</th><th>Value</th></tr>
-    <tr><td>AI Model</td><td><code>{{ stats.current_model }}</code></td></tr>
-    <tr><td>OpenRouter Key</td><td><code>{{ stats.api_key_preview }}</code></td></tr>
-  </table>
-  <br><a href="/settings" class="btn btn-sm">⚙️ Change Settings</a>
+<div class="grid-2">
+
+  {# ── AI calls chart ── #}
+  <div class="card">
+    <h2>AI Calls — Last 7 Days</h2>
+    {% set max_ai = stats.ai_7days | map(attribute=1) | max | default(1) %}
+    {% set max_ai = [max_ai, 1] | max %}
+    <div class="bar-chart">
+      {% for label, val in stats.ai_7days %}
+      <div class="bar-col">
+        <div class="bar-val">{{ val }}</div>
+        <div class="bar" style="height:{{ [val * 60 // max_ai, 2] | max }}px;background:{% if val > 0 %}#7c3aed88{% else %}#2a2a4a{% endif %}"></div>
+        <div class="bar-label">{{ label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {# ── Command volume chart ── #}
+  <div class="card">
+    <h2>Command Volume — Last 7 Days</h2>
+    {% set max_vol = stats.vol_7days | map(attribute=1) | max | default(1) %}
+    {% set max_vol = [max_vol, 1] | max %}
+    <div class="bar-chart">
+      {% for label, val in stats.vol_7days %}
+      <div class="bar-col">
+        <div class="bar-val">{{ val }}</div>
+        <div class="bar" style="height:{{ [val * 60 // max_vol, 2] | max }}px;background:{% if val > 0 %}#4c8aed88{% else %}#2a2a4a{% endif %}"></div>
+        <div class="bar-label">{{ label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
 </div>
 
-<div class="card">
-  <h2>Top Askers (free questions used)</h2>
-  <table>
-    <tr><th>Name</th><th>Telegram ID</th><th>Questions Used</th></tr>
-    {% for row in stats.top_askers %}
-    <tr>
-      <td>{{ row.name or "—" }}</td>
-      <td><code>{{ row.telegram_id }}</code></td>
-      <td>{{ row.free_questions_used }}</td>
-    </tr>
-    {% else %}
-    <tr><td colspan="3" style="color:#9ca3af">No data yet</td></tr>
+<div class="grid-2">
+
+  {# ── Top commands today ── #}
+  <div class="card">
+    <div class="card-header">
+      <h2>Top Commands Today</h2>
+      <a href="/analytics" class="btn btn-sm btn-outline">Full Analytics →</a>
+    </div>
+    {% if stats.cmd_today %}
+    {% set max_cmd = stats.cmd_today[0][1] | default(1) %}
+    {% set max_cmd = [max_cmd, 1] | max %}
+    {% for cmd, count in stats.cmd_today %}
+    <div class="hbar-row">
+      <div class="hbar-label">/{{ cmd }}</div>
+      <div class="hbar-track"><div class="hbar-fill" style="width:{{ count * 100 // max_cmd }}%"></div></div>
+      <div class="hbar-val">{{ count }}</div>
+    </div>
     {% endfor %}
-  </table>
+    {% else %}
+    <p class="muted">No command data yet. Commands are tracked once users interact with the bot.</p>
+    {% endif %}
+  </div>
+
+  {# ── Subscription tiers ── #}
+  <div class="card">
+    <h2>Subscription Breakdown</h2>
+    {% set total_t = (stats.tier_map.values() | sum) | default(1) %}
+    {% set total_t = [total_t, 1] | max %}
+    {% for tier in ['free','basic','premium','elite'] %}
+    {% set cnt = stats.tier_map[tier] | default(0) %}
+    <div class="hbar-row">
+      <div class="hbar-label"><span class="badge badge-{{ tier }}">{{ tier }}</span></div>
+      <div class="hbar-track"><div class="hbar-fill" style="width:{{ cnt * 100 // total_t }}%"></div></div>
+      <div class="hbar-val">{{ cnt }}</div>
+    </div>
+    {% endfor %}
+    <hr class="divider">
+    <div class="row">
+      <a href="/users?tier=basic" class="btn btn-sm btn-outline">Basic</a>
+      <a href="/users?tier=premium" class="btn btn-sm btn-outline">Premium</a>
+      <a href="/users?tier=elite" class="btn btn-sm btn-outline">Elite</a>
+    </div>
+  </div>
+
+</div>
+
+<div class="grid-2">
+
+  {# ── Recent users ── #}
+  <div class="card">
+    <div class="card-header">
+      <h2>Recent Users</h2>
+      <a href="/users" class="btn btn-sm btn-outline">All Users →</a>
+    </div>
+    <table>
+      <tr><th>Name</th><th>Lang</th><th>Tier</th><th>Joined</th></tr>
+      {% for u in stats.recent_users %}
+      <tr>
+        <td><a href="/users/{{ u.telegram_id }}">{{ u.name or "—" }}</a></td>
+        <td><span class="badge badge-{{ u.language or 'en' }}">{{ (u.language or 'en').upper() }}</span></td>
+        <td><span class="badge badge-{{ u.subscription_tier or 'free' }}">{{ u.subscription_tier or 'free' }}</span></td>
+        <td class="muted">{{ u.created_at.strftime('%d %b %H:%M') if u.created_at else '—' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="muted" style="padding:16px">No users yet</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  {# ── Top askers ── #}
+  <div class="card">
+    <h2>Most Active (/ask)</h2>
+    <table>
+      <tr><th>Name</th><th>Tier</th><th>Questions Used</th></tr>
+      {% for u in stats.top_askers %}
+      <tr>
+        <td><a href="/users/{{ u.telegram_id }}">{{ u.name or "—" }}</a></td>
+        <td><span class="badge badge-{{ u.subscription_tier or 'free' }}">{{ u.subscription_tier or 'free' }}</span></td>
+        <td>{{ u.free_questions_used or 0 }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="3" class="muted" style="padding:16px">No data yet</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+
 </div>
 {% endblock %}

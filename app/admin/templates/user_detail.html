@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}User — {{ u.name or u.telegram_id }}{% endblock %}
+{% block content %}
+
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+  <a href="/users" class="muted" style="font-size:13px">← Users</a>
+  <h1 style="margin:0">{{ u.name or "Unknown" }}</h1>
+  <span class="badge badge-{{ u.subscription_tier or 'free' }}">{{ u.subscription_tier or 'free' }}</span>
+  <span class="badge badge-{{ u.language or 'en' }}">{{ (u.language or 'en').upper() }}</span>
+</div>
+
+{% if msg == 'tier_saved' %}
+<div class="alert alert-success">✅ Subscription tier updated.</div>
+{% elif msg == 'questions_reset' %}
+<div class="alert alert-success">✅ Free questions reset to 0.</div>
+{% elif msg == 'notif_toggled' %}
+<div class="alert alert-success">✅ Notification preference toggled.</div>
+{% elif msg == 'confirm_required' %}
+<div class="alert alert-warn">⚠️ Type DELETE to confirm deletion.</div>
+{% endif %}
+
+<div class="grid-2">
+
+  {# ── Profile ── #}
+  <div class="card">
+    <h2>Profile</h2>
+    <table>
+      <tr><td style="color:#6b7280;width:140px">Telegram ID</td><td><code>{{ u.telegram_id }}</code></td></tr>
+      <tr><td style="color:#6b7280">Name</td><td>{{ u.name or "—" }}</td></tr>
+      <tr><td style="color:#6b7280">Gender</td><td>{{ u.gender or "—" }}</td></tr>
+      <tr><td style="color:#6b7280">Language</td><td><span class="badge badge-{{ u.language or 'en' }}">{{ (u.language or 'en').upper() }}</span></td></tr>
+      <tr><td style="color:#6b7280">Joined</td><td>{{ u.created_at.strftime('%d %b %Y, %H:%M UTC') if u.created_at else '—' }}</td></tr>
+    </table>
+  </div>
+
+  {# ── Birth data ── #}
+  <div class="card">
+    <h2>Birth Data {% if not u.birth_date %}<span class="muted" style="font-weight:400">(not set)</span>{% endif %}</h2>
+    <table>
+      <tr><td style="color:#6b7280;width:140px">Date of Birth</td><td>{{ u.birth_date.strftime('%d %B %Y') if u.birth_date else '—' }}</td></tr>
+      <tr><td style="color:#6b7280">Birth Time</td><td>{{ u.birth_time.strftime('%H:%M') if u.birth_time else 'Not provided' }}</td></tr>
+      <tr><td style="color:#6b7280">City</td><td>{{ u.city_name or '—' }}</td></tr>
+      <tr><td style="color:#6b7280">Latitude</td><td>{{ '%.4f' | format(u.birth_lat) if u.birth_lat else '—' }}</td></tr>
+      <tr><td style="color:#6b7280">Longitude</td><td>{{ '%.4f' | format(u.birth_lon) if u.birth_lon else '—' }}</td></tr>
+      <tr><td style="color:#6b7280">Timezone</td><td>{{ u.timezone or '—' }}</td></tr>
+    </table>
+  </div>
+
+</div>
+
+<div class="grid-3">
+
+  {# ── Manage subscription ── #}
+  <div class="card">
+    <h2>Subscription Tier</h2>
+    <p class="muted" style="margin-bottom:12px">Current: <span class="badge badge-{{ u.subscription_tier or 'free' }}">{{ u.subscription_tier or 'free' }}</span></p>
+    <form method="POST" action="/users/{{ u.telegram_id }}/tier">
+      <label>Change Tier</label>
+      <select name="tier">
+        {% for t in tiers %}
+        <option value="{{ t }}" {% if t == (u.subscription_tier or 'free') %}selected{% endif %}>{{ t | capitalize }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn btn-sm">💾 Save Tier</button>
+    </form>
+  </div>
+
+  {# ── /ask questions ── #}
+  <div class="card">
+    <h2>Ask Questions</h2>
+    <p class="muted" style="margin-bottom:4px">Free questions used:</p>
+    <p style="font-size:28px;font-weight:700;color:#a78bfa;margin-bottom:12px">{{ u.free_questions_used or 0 }} / 3</p>
+    {% if (u.subscription_tier or 'free') != 'free' %}
+    <p class="muted" style="margin-bottom:12px">Paid user — unlimited questions.</p>
+    {% endif %}
+    <form method="POST" action="/users/{{ u.telegram_id }}/reset-questions">
+      <button type="submit" class="btn btn-sm btn-green">🔄 Reset to 0</button>
+    </form>
+  </div>
+
+  {# ── Notifications ── #}
+  <div class="card">
+    <h2>Notifications</h2>
+    <p class="muted" style="margin-bottom:8px">Daily push status:</p>
+    <p style="margin-bottom:14px">
+      <span class="badge {% if u.notifications_enabled %}badge-on{% else %}badge-off{% endif %}" style="font-size:14px;padding:4px 12px">
+        {% if u.notifications_enabled %}🔔 Enabled{% else %}🔕 Disabled{% endif %}
+      </span>
+    </p>
+    <form method="POST" action="/users/{{ u.telegram_id }}/toggle-notifications">
+      <button type="submit" class="btn btn-sm btn-outline">Toggle</button>
+    </form>
+  </div>
+
+</div>
+
+{# ── Danger zone ── #}
+<div class="card" style="border-color:#7f1d1d44">
+  <h2 style="color:#f87171">Danger Zone</h2>
+  <p class="muted" style="margin-bottom:14px">Permanently delete this user and all their data. Type <code>DELETE</code> to confirm.</p>
+  <form method="POST" action="/users/{{ u.telegram_id }}/delete" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <input type="text" name="confirm" placeholder='Type DELETE to confirm' style="flex:1;min-width:200px;margin-bottom:0">
+    <button type="submit" class="btn btn-danger">🗑️ Delete User</button>
+  </form>
+</div>
+
+{% endblock %}

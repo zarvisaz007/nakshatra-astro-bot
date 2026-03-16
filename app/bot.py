@@ -1,11 +1,13 @@
 import asyncio
 import logging
+from datetime import date
+from typing import Any, Awaitable, Callable, Dict
 
-from aiogram import Bot, Dispatcher
+from aiogram import BaseMiddleware, Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.redis import RedisStorage
-from aiogram.types import BotCommand
+from aiogram.types import BotCommand, Message
 
 from app.config import settings
 from app.database import create_tables
@@ -24,6 +26,26 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+class StatsMiddleware(BaseMiddleware):
+    """Track command usage + active users in Redis for admin dashboard."""
+    async def __call__(self, handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
+                       event: Message, data: Dict[str, Any]) -> Any:
+        if event.text and event.text.startswith("/"):
+            try:
+                from app.services.cache import get_redis
+                cmd = event.text.split()[0].lstrip("/").split("@")[0].lower()
+                r = get_redis()
+                today = date.today().isoformat()
+                await r.incr(f"stats:cmd:{cmd}:{today}")
+                await r.expire(f"stats:cmd:{cmd}:{today}", 86400 * 30)
+                await r.incr(f"stats:cmd:{cmd}:total")
+                await r.sadd(f"stats:users:active:{today}", event.from_user.id)
+                await r.expire(f"stats:users:active:{today}", 86400 * 2)
+            except Exception:
+                pass
+        return await handler(event, data)
+
+
 async def main() -> None:
     await create_tables()
     logger.info("Database tables ready")
@@ -34,6 +56,7 @@ async def main() -> None:
         default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN),
     )
     dp = Dispatcher(storage=storage)
+    dp.message.middleware(StatsMiddleware())
 
     dp.include_router(start.router)
     dp.include_router(horoscope.router)

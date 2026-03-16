@@ -1,40 +1,75 @@
 {% extends "base.html" %}
 {% block title %}Users{% endblock %}
 {% block content %}
-<h1>Users</h1>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+  <h1 style="margin:0">Users <span class="muted" style="font-size:14px;font-weight:400">({{ total }} total)</span></h1>
+</div>
 
-<form method="GET" action="/users" class="search-bar">
-  <input type="text" name="search" value="{{ search }}" placeholder="Search by name or Telegram ID...">
+<form method="GET" action="/users" class="filters">
+  <input type="text" name="search" value="{{ search }}" placeholder="Search name or Telegram ID…" style="flex:2">
+  <select name="tier" style="flex:1">
+    <option value="">All Tiers</option>
+    {% for t in tiers %}
+    <option value="{{ t }}" {% if t == tier_filter %}selected{% endif %}>{{ t | capitalize }}</option>
+    {% endfor %}
+  </select>
+  <select name="lang" style="flex:1">
+    <option value="">All Languages</option>
+    <option value="en" {% if lang_filter == 'en' %}selected{% endif %}>English</option>
+    <option value="hi" {% if lang_filter == 'hi' %}selected{% endif %}>Hindi</option>
+  </select>
   <button type="submit" class="btn">Search</button>
-  {% if search %}<a href="/users" class="btn" style="background:#374151">Clear</a>{% endif %}
+  {% if search or tier_filter or lang_filter %}
+  <a href="/users" class="btn btn-outline">Clear</a>
+  {% endif %}
 </form>
 
-<div class="card">
+<div class="card" style="padding:0;overflow:hidden">
   <table>
     <tr>
-      <th>Name</th><th>Telegram ID</th><th>Lang</th><th>City</th>
-      <th>Nakshatra</th><th>Questions</th><th>Tier</th><th>Joined</th>
+      <th>Name</th>
+      <th>Telegram ID</th>
+      <th>Lang</th>
+      <th>City</th>
+      <th>DOB</th>
+      <th>Notif</th>
+      <th>Questions</th>
+      <th>Tier</th>
+      <th>Joined</th>
+      <th></th>
     </tr>
     {% for u in users %}
     <tr>
-      <td>{{ u.name or "—" }}</td>
+      <td><a href="/users/{{ u.telegram_id }}" style="font-weight:500">{{ u.name or "—" }}</a></td>
       <td><code>{{ u.telegram_id }}</code></td>
-      <td>{{ u.language or "en" }}</td>
-      <td>{{ u.city_name or "—" }}</td>
-      <td>{{ "—" if not u.birth_date else "✓" }}</td>
-      <td>{{ u.free_questions_used or 0 }}</td>
+      <td><span class="badge badge-{{ u.language or 'en' }}">{{ (u.language or 'en').upper() }}</span></td>
+      <td class="muted">{{ u.city_name or "—" }}</td>
+      <td class="muted">{{ u.birth_date.strftime('%d %b %Y') if u.birth_date else "—" }}</td>
       <td>
-        <span class="badge {% if u.subscription_tier == 'free' %}badge-free{% else %}badge-paid{% endif %}">
-          {{ u.subscription_tier or "free" }}
+        <span class="badge {% if u.notifications_enabled %}badge-on{% else %}badge-off{% endif %}">
+          {% if u.notifications_enabled %}ON{% else %}OFF{% endif %}
         </span>
       </td>
-      <td style="color:#6b7280;font-size:12px">
-        {{ u.created_at.strftime('%d %b %Y') if u.created_at else "—" }}
-      </td>
+      <td style="text-align:center">{{ u.free_questions_used or 0 }}</td>
+      <td><span class="badge badge-{{ u.subscription_tier or 'free' }}">{{ u.subscription_tier or 'free' }}</span></td>
+      <td class="muted">{{ u.created_at.strftime('%d %b %Y') if u.created_at else "—" }}</td>
+      <td><a href="/users/{{ u.telegram_id }}" class="btn btn-sm btn-outline">View</a></td>
     </tr>
     {% else %}
-    <tr><td colspan="8" style="color:#9ca3af;padding:20px">No users found</td></tr>
+    <tr><td colspan="10" class="muted" style="padding:24px;text-align:center">No users found</td></tr>
     {% endfor %}
   </table>
 </div>
+
+{% if total > page_size %}
+<div class="pagination">
+  {% if page > 1 %}
+  <a href="/users?search={{ search }}&tier={{ tier_filter }}&lang={{ lang_filter }}&page={{ page - 1 }}" class="btn btn-sm btn-outline">← Prev</a>
+  {% endif %}
+  <span class="page-info">Page {{ page }} of {{ ((total - 1) // page_size) + 1 }} &nbsp;·&nbsp; {{ total }} users</span>
+  {% if page * page_size < total %}
+  <a href="/users?search={{ search }}&tier={{ tier_filter }}&lang={{ lang_filter }}&page={{ page + 1 }}" class="btn btn-sm btn-outline">Next →</a>
+  {% endif %}
+</div>
+{% endif %}
 {% endblock %}
