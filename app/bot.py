@@ -14,6 +14,7 @@ from app.handlers import match, dosha, remedy, lucky
 from app.handlers import career, marriage, wealth, dasha
 from app.handlers import puja, mantra, gems
 from app.handlers import numerology, dream, palm, notifications
+from app.handlers import reportcard, sharecard, milestones
 from app.services.scheduler import run_scheduler
 
 logging.basicConfig(
@@ -56,6 +57,9 @@ async def main() -> None:
     dp.include_router(dream.router)
     dp.include_router(palm.router)
     dp.include_router(notifications.router)
+    dp.include_router(reportcard.router)
+    dp.include_router(sharecard.router)
+    dp.include_router(milestones.router)
 
     await bot.set_my_commands([
         BotCommand(command="start",     description="🔄 Setup / Change language"),
@@ -80,6 +84,9 @@ async def main() -> None:
         BotCommand(command="dream",         description="🌙 Dream interpretation"),
         BotCommand(command="palmreading",   description="🖐️ Palm reading (send photo)"),
         BotCommand(command="notifications", description="🔔 Toggle daily notifications"),
+        BotCommand(command="reportcard",    description="🔯 Your Destiny Report Card (shareable)"),
+        BotCommand(command="sharecard",     description="💑 Compatibility card (shareable)"),
+        BotCommand(command="milestones",    description="🌟 Life milestones & dasha forecast"),
     ])
 
     asyncio.create_task(run_scheduler(bot))
